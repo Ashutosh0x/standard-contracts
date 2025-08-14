@@ -36,12 +36,18 @@ jobs:
       - name: Install Solana 1.18.32 (bundles Rust >=1.79 for SBF)
         shell: bash
         run: |
-          sudo apt-get update -y && sudo apt-get install -y curl
+          sudo apt-get update -y && sudo apt-get install -y curl ca-certificates
           set -euo pipefail
-          curl -sSfL https://release.solana.com/v1.18.32/solana-install-init-x86_64-unknown-linux-gnu \
-            -o /tmp/solana-install-init
-          chmod +x /tmp/solana-install-init
-          /tmp/solana-install-init v1.18.32
+          SOLANA_VER=v1.18.32
+          INSTALLER=/tmp/solana-install-init
+          # Try official release host first (with retries and HTTP/1.1), then fallback to GitHub Releases
+          if ! curl -fL --retry 5 --retry-delay 2 --connect-timeout 20 --max-time 300 --http1.1 \
+               https://release.solana.com/$SOLANA_VER/solana-install-init-x86_64-unknown-linux-gnu -o "$INSTALLER"; then
+            curl -fL --retry 5 --retry-delay 2 --connect-timeout 20 --max-time 300 --http1.1 \
+               https://github.com/solana-labs/solana/releases/download/$SOLANA_VER/solana-install-init-x86_64-unknown-linux-gnu -o "$INSTALLER"
+          fi
+          chmod +x "$INSTALLER"
+          "$INSTALLER" "$SOLANA_VER"
           echo "$HOME/.local/share/solana/install/active_release/solana-release/bin" >> $GITHUB_PATH
           solana --version || true
           cargo-build-sbf --version || true
