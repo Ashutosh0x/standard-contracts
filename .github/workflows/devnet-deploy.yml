@@ -38,10 +38,16 @@ jobs:
         run: |
           sudo apt-get update -y && sudo apt-get install -y tar bzip2
           mkdir -p ~/.local/share/solana/install/releases/1.18.26
-          curl -L https://github.com/solana-labs/solana/releases/download/v1.18.26/solana-release_x86_64-unknown-linux-gnu.tar.bz2 \
-            -o /tmp/solana-release.tar.bz2 || \
-          curl -L https://github.com/solana-labs/solana/releases/download/v1.18.26/solana-release-x86_64-unknown-linux-gnu.tar.bz2 \
-            -o /tmp/solana-release.tar.bz2
+          set -e
+          # Try correct URL first (hyphen); fall back to alt if needed, and fail on HTTP errors
+          if ! curl -fL https://github.com/solana-labs/solana/releases/download/v1.18.26/solana-release-x86_64-unknown-linux-gnu.tar.bz2 -o /tmp/solana-release.tar.bz2; then
+            curl -fL https://github.com/solana-labs/solana/releases/download/v1.18.26/solana-release_x86_64-unknown-linux-gnu.tar.bz2 -o /tmp/solana-release.tar.bz2
+          fi
+          # Sanity check the tarball really is bzip2
+          if ! tar -tjf /tmp/solana-release.tar.bz2 >/dev/null 2>&1; then
+            echo "Downloaded tarball invalid; aborting" >&2
+            exit 2
+          fi
           tar -xjf /tmp/solana-release.tar.bz2 -C ~/.local/share/solana/install/releases/1.18.26
           ln -sfn ~/.local/share/solana/install/releases/1.18.26 ~/.local/share/solana/install/active_release
           solana --version || true
