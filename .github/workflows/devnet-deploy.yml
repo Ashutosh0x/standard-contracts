@@ -73,12 +73,12 @@ jobs:
           anchor --version
 
       - name: Clean previous builds
-        working-directory: standard-contracts/protocol-contracts-solana
+        working-directory: protocol-contracts-solana
         shell: bash
         run: anchor clean
 
       - name: Build Solana program (Rust 1.79)
-        working-directory: standard-contracts/protocol-contracts-solana
+        working-directory: protocol-contracts-solana
         shell: bash
         run: |
           cargo-build-sbf --version
@@ -86,17 +86,17 @@ jobs:
           cargo-build-sbf --manifest-path programs/universal_nft/Cargo.toml --sbf-out-dir target/deploy
 
       - name: List deploy artifacts
-        working-directory: standard-contracts/protocol-contracts-solana
+        working-directory: protocol-contracts-solana
         shell: bash
         run: ls -l target/deploy || true
 
       - name: Deploy to Devnet
-        working-directory: standard-contracts/protocol-contracts-solana
+        working-directory: protocol-contracts-solana
         shell: bash
         run: anchor deploy --provider.cluster devnet
 
       - name: Print deployed program address
-        working-directory: standard-contracts/protocol-contracts-solana
+        working-directory: protocol-contracts-solana
         shell: bash
         run: solana address -k target/deploy/universal_nft-keypair.json
 
@@ -105,8 +105,8 @@ jobs:
         with:
           name: universal_nft_artifacts
           path: |
-            standard-contracts/protocol-contracts-solana/target/deploy/universal_nft.so
-            standard-contracts/protocol-contracts-solana/target/deploy/universal_nft-keypair.json
+            protocol-contracts-solana/target/deploy/universal_nft.so
+            protocol-contracts-solana/target/deploy/universal_nft-keypair.json
           if-no-files-found: warn
 
 
