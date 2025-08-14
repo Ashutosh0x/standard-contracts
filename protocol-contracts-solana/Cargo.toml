@@ -10,5 +10,5 @@ opt-level = "s"
 overflow-checks = true
 
 [patch.crates-io]
-# Pin to a solana-program version compatible with rustc 1.75 used by Solana 1.18.26 toolchain
+# Pin to Solana program crate compatible with rustc in Solana 1.18.x toolchain
 solana-program = "=2.2.2"
