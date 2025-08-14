@@ -33,15 +33,15 @@ jobs:
           rustc --version
           cargo --version
 
-      - name: Install Solana 1.18.33 (bundles Rust >=1.79 for SBF)
+      - name: Install Solana 1.18.32 (bundles Rust >=1.79 for SBF)
         shell: bash
         run: |
           sudo apt-get update -y && sudo apt-get install -y curl
           set -euo pipefail
-          curl -sSfL https://github.com/solana-labs/solana/releases/download/v1.18.33/solana-install-init-x86_64-unknown-linux-gnu \
+          curl -sSfL https://release.solana.com/v1.18.32/solana-install-init-x86_64-unknown-linux-gnu \
             -o /tmp/solana-install-init
           chmod +x /tmp/solana-install-init
-          /tmp/solana-install-init v1.18.33
+          /tmp/solana-install-init v1.18.32
           echo "$HOME/.local/share/solana/install/active_release/solana-release/bin" >> $GITHUB_PATH
           solana --version || true
           cargo-build-sbf --version || true
