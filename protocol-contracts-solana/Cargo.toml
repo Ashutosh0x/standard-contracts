@@ -9,6 +9,6 @@ members = [
 opt-level = "s"
 overflow-checks = true
 
-[patch.crates-io]
+[workspace.dependencies]
 # Pin to Solana program crate compatible with rustc in Solana 1.18.x toolchain
 solana-program = "=2.2.1"
