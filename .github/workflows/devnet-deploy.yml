@@ -50,6 +50,8 @@ jobs:
           fi
           tar -xjf /tmp/solana-release.tar.bz2 -C ~/.local/share/solana/install/releases/1.18.26
           ln -sfn ~/.local/share/solana/install/releases/1.18.26 ~/.local/share/solana/install/active_release
+          # Expose Solana binaries to subsequent steps
+          echo "$HOME/.local/share/solana/install/active_release/solana-release/bin" >> $GITHUB_PATH
           solana --version || true
           cargo-build-sbf --version || true
 
