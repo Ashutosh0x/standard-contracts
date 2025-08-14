@@ -33,25 +33,43 @@ jobs:
           rustc --version
           cargo --version
 
-      - name: Install Solana 1.18.32 (bundles Rust >=1.79 for SBF)
+      - name: Install Solana toolchain (bundles Rust >=1.79 for SBF)
         shell: bash
         run: |
           sudo apt-get update -y && sudo apt-get install -y curl ca-certificates tar bzip2
           set -euo pipefail
-          SOLANA_VER=v1.18.32
           TARBALL=/tmp/solana-release.tar.bz2
-          DEST="$HOME/.local/share/solana/install/releases/1.18.32"
-          mkdir -p "$DEST"
-          # Prefer GitHub Releases tarball; fallback to release.solana.com
-          if ! curl -fL --retry 5 --retry-delay 2 --connect-timeout 20 --max-time 600 \
-               https://github.com/solana-labs/solana/releases/download/$SOLANA_VER/solana-release-x86_64-unknown-linux-gnu.tar.bz2 -o "$TARBALL"; then
-            curl -fL --retry 5 --retry-delay 2 --connect-timeout 20 --max-time 600 \
-               https://release.solana.com/$SOLANA_VER/solana-release-x86_64-unknown-linux-gnu.tar.bz2 -o "$TARBALL"
-          fi
-          # Validate archive
-          tar -tjf "$TARBALL" >/dev/null 2>&1
-          tar -xjf "$TARBALL" -C "$DEST"
-          ln -sfn "$DEST" "$HOME/.local/share/solana/install/active_release"
+          DEST_BASE="$HOME/.local/share/solana/install/releases"
+          mkdir -p "$DEST_BASE"
+          # Try a list of known 1.18.x versions (preferring newest first)
+          for SOLANA_VER in v1.18.33 v1.18.32 v1.18.31 v1.18.30 v1.18.26; do
+            echo "Attempting Solana $SOLANA_VER"
+            DEST="$DEST_BASE/${SOLANA_VER#v}"
+            mkdir -p "$DEST"
+            if curl -fL --retry 5 --retry-delay 2 --connect-timeout 20 --max-time 600 \
+                 https://github.com/solana-labs/solana/releases/download/$SOLANA_VER/solana-release-x86_64-unknown-linux-gnu.tar.bz2 -o "$TARBALL"; then
+              true
+            else
+              if ! curl -fL --retry 5 --retry-delay 2 --connect-timeout 20 --max-time 600 \
+                   https://release.solana.com/$SOLANA_VER/solana-release-x86_64-unknown-linux-gnu.tar.bz2 -o "$TARBALL"; then
+                echo "Failed to download for $SOLANA_VER, trying next" >&2
+                rm -f "$TARBALL"
+                rmdir "$DEST" || true
+                continue
+              fi
+            fi
+            # Validate and extract
+            if tar -tjf "$TARBALL" >/dev/null 2>&1; then
+              tar -xjf "$TARBALL" -C "$DEST"
+              ln -sfn "$DEST" "$HOME/.local/share/solana/install/active_release"
+              break
+            else
+              echo "Tarball invalid for $SOLANA_VER, trying next" >&2
+              rm -f "$TARBALL"
+              rmdir "$DEST" || true
+            fi
+          done
+          # Ensure binaries on PATH
           echo "$HOME/.local/share/solana/install/active_release/solana-release/bin" >> $GITHUB_PATH
           solana --version || true
           cargo-build-sbf --version || true
