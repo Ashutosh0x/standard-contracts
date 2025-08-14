@@ -112,6 +112,8 @@ jobs:
         run: |
           anchor --version
           docker --version
+          # Print rust version inside docker build to confirm >=1.79
+          export ANCHOR_BUILD_ARGS="--build-arg PRINT_RUST_VERSION=1"
           anchor clean
           anchor build
 
