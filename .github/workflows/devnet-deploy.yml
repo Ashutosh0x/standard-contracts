@@ -106,14 +106,14 @@ jobs:
         shell: bash
         run: anchor clean
 
-      - name: Build Solana program (SBF)
+      - name: Build Solana program (Anchor Docker toolchain)
         working-directory: protocol-contracts-solana
         shell: bash
         run: |
-          cargo-build-sbf --version || true
-          cargo +1.79.0 --version || true
+          anchor --version
+          docker --version
           anchor clean
-          cargo-build-sbf --manifest-path programs/universal_nft/Cargo.toml --sbf-out-dir target/deploy
+          anchor build
 
       - name: List deploy artifacts
         working-directory: protocol-contracts-solana
@@ -123,7 +123,9 @@ jobs:
       - name: Deploy to Devnet
         working-directory: protocol-contracts-solana
         shell: bash
-        run: anchor deploy --provider.cluster devnet
+        run: |
+          # Use the same toolchain as the Anchor Docker build for deployment
+          anchor deploy --provider.cluster devnet
 
       - name: Print deployed program address
         working-directory: protocol-contracts-solana
