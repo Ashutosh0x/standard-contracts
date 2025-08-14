@@ -33,24 +33,15 @@ jobs:
           rustc --version
           cargo --version
 
-      - name: Download Solana 1.18.26
+      - name: Install Solana 1.18.33 (bundles Rust >=1.79 for SBF)
         shell: bash
         run: |
-          sudo apt-get update -y && sudo apt-get install -y tar bzip2
-          mkdir -p ~/.local/share/solana/install/releases/1.18.26
-          set -e
-          # Try correct URL first (hyphen); fall back to alt if needed, and fail on HTTP errors
-          if ! curl -fL https://github.com/solana-labs/solana/releases/download/v1.18.26/solana-release-x86_64-unknown-linux-gnu.tar.bz2 -o /tmp/solana-release.tar.bz2; then
-            curl -fL https://github.com/solana-labs/solana/releases/download/v1.18.26/solana-release_x86_64-unknown-linux-gnu.tar.bz2 -o /tmp/solana-release.tar.bz2
-          fi
-          # Sanity check the tarball really is bzip2
-          if ! tar -tjf /tmp/solana-release.tar.bz2 >/dev/null 2>&1; then
-            echo "Downloaded tarball invalid; aborting" >&2
-            exit 2
-          fi
-          tar -xjf /tmp/solana-release.tar.bz2 -C ~/.local/share/solana/install/releases/1.18.26
-          ln -sfn ~/.local/share/solana/install/releases/1.18.26 ~/.local/share/solana/install/active_release
-          # Expose Solana binaries to subsequent steps
+          sudo apt-get update -y && sudo apt-get install -y curl
+          set -euo pipefail
+          curl -sSfL https://github.com/solana-labs/solana/releases/download/v1.18.33/solana-install-init-x86_64-unknown-linux-gnu \
+            -o /tmp/solana-install-init
+          chmod +x /tmp/solana-install-init
+          /tmp/solana-install-init v1.18.33
           echo "$HOME/.local/share/solana/install/active_release/solana-release/bin" >> $GITHUB_PATH
           solana --version || true
           cargo-build-sbf --version || true
