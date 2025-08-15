@@ -30,9 +30,7 @@ pub struct HandleIncoming<'info> {
     #[account(
         init,
         payer = payer,
-        space = NftOrigin::LEN,
-        seeds = [b"nft_origin", &payload[..32]], // Use first 32 bytes of payload as token_id
-        bump
+        space = NftOrigin::LEN
     )]
     pub nft_origin: Account<'info, NftOrigin>,
     /// CHECK: gateway program config PDA

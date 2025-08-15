@@ -23,7 +23,7 @@ jobs:
     - name: Setup Rust
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: stable
+        toolchain: 1.75.0
         override: true
         
     - name: Setup Solana CLI
