@@ -1,6 +1,6 @@
 ﻿use anchor_lang::prelude::*;
 
-declare_id!("FXFjiHkZLqR9TWdGRcYAZPvFZLSXNrfKD3rwPTPoB8Xe");
+declare_id!("7bwYem3NvksZcsmgBLtNbQLkS1p35ahHa7JsssKeQ8UT");
 
 #[program]
 pub mod universal_nft {

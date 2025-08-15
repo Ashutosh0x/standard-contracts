@@ -30,10 +30,12 @@ jobs:
       run: |
         sh -c "$(curl -sSfL https://release.solana.com/v${{ env.SOLANA_VERSION }}/install)"
         echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+        export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
         
     - name: Setup Anchor CLI
       run: |
-        npm install -g @coral-xyz/anchor-cli@${{ env.ANCHOR_VERSION }}
+        cargo install --git https://github.com/coral-xyz/anchor --tag v${{ env.ANCHOR_VERSION }} anchor-cli --locked
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
         
     - name: Setup Node.js
       uses: actions/setup-node@v4
