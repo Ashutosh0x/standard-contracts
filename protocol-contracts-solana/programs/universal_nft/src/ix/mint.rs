@@ -1,10 +1,12 @@
 ﻿use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Mint, Token, TokenAccount};
+use anchor_lang::prelude::UncheckedAccount;
 use sha2::{Digest, Sha256};
 
 use crate::state::nft_origin::NftOrigin;
 use crate::utils::*;
+use mpl_token_metadata::ID as TOKEN_METADATA_ID;
 
 #[derive(Accounts)]
 pub struct MintNewNft<'info> {
@@ -19,6 +21,12 @@ pub struct MintNewNft<'info> {
         mint::freeze_authority = payer,
     )]
     pub mint: Account<'info, Mint>,
+    /// CHECK: Metaplex metadata PDA for this mint; created via CPI
+    #[account(mut)]
+    pub metadata: UncheckedAccount<'info>,
+    /// CHECK: Metaplex master edition PDA for this mint; created via CPI
+    #[account(mut)]
+    pub master_edition: UncheckedAccount<'info>,
     #[account(
         init,
         payer = payer,
@@ -29,9 +37,7 @@ pub struct MintNewNft<'info> {
     #[account(
         init,
         payer = payer,
-        space = NftOrigin::LEN,
-        seeds = [b"nft_origin", &mint.key().to_bytes()[..8]], // Use first 8 bytes of mint key
-        bump
+        space = NftOrigin::LEN
     )]
     pub nft_origin: Account<'info, NftOrigin>,
     pub token_program: Program<'info, Token>,
@@ -65,6 +71,28 @@ pub fn handler(ctx: Context<MintNewNft>, metadata_uri: String) -> Result<()> {
             },
         ),
         1,
+    )?;
+
+    // Create Metaplex metadata and master edition
+    cpi_create_metadata_v3(
+        &ctx.accounts.payer.to_account_info(),
+        &ctx.accounts.mint.to_account_info(),
+        &ctx.accounts.payer.to_account_info(),
+        &ctx.accounts.payer.to_account_info(),
+        &ctx.accounts.metadata.to_account_info(),
+        &ctx.accounts.system_program.to_account_info(),
+        "UniversalNFT".to_string(),
+        "UNFT".to_string(),
+        metadata_uri.clone(),
+    )?;
+
+    cpi_create_master_edition_v3(
+        &ctx.accounts.payer.to_account_info(),
+        &ctx.accounts.mint.to_account_info(),
+        &ctx.accounts.payer.to_account_info(),
+        &ctx.accounts.payer.to_account_info(),
+        &ctx.accounts.metadata.to_account_info(),
+        &ctx.accounts.master_edition.to_account_info(),
     )?;
 
     // Create nft_origin PDA to store metadata

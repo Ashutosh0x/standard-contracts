@@ -80,19 +80,19 @@ anchor test --skip-local-validator
 
 **⚠️ Important**: Due to potential Solana compatibility issues with the current version of ZetaChain localnet, **devnet testing is required** for Solana integration. Localnet testing is not required at this time.
 
-The program integrates with ZetaChain's devnet infrastructure:
+Run the devnet script to provision EVM contracts and deploy the Solana program:
 
 ```bash
-# Run the complete cross-chain flow
 cd ../../contracts/nft/scripts
-chmod +x localnet_solana.sh
-./localnet_solana.sh
+chmod +x devnet.sh
+./devnet.sh
 ```
 
-This demonstrates the full flow:
-1. **ZetaChain** → **Ethereum** → **BNB** → **Solana** → **ZetaChain**
-
-**Note**: For production testing, use ZetaChain devnet and testnet instead of localnet.
+This demonstrates the flows:
+1. Mint on Solana devnet → send to Base Sepolia
+2. Mint on ZetaChain testnet → send to Solana devnet
+3. Mint on Base Sepolia → send to Solana devnet
+4. ZetaChain → Base Sepolia → Solana → ZetaChain
 
 ### Gateway Integration
 
