@@ -30,9 +30,10 @@ jobs:
 
       # Install Solana CLI
       - name: Install Solana CLI
-        uses: ajamaica/setup-solana@v0.0.3
-        with:
-          solana-version: "1.17.0"
+        run: |
+          sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          solana --version
 
       # Install Anchor
       - name: Install Anchor
