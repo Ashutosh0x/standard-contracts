@@ -17,12 +17,13 @@ jobs:
 
       # 2. Set up Solana CLI
       - name: Set up Solana
-        uses: ajamaica/setup-solana@v0.0.3
-        with:
-          solana-version: "1.17.0"
-
-      - name: Verify Solana
-        run: solana --version
+        run: |
+          # Download Solana CLI from GitHub releases (more reliable than release.solana.com)
+          SOLANA_VERSION="1.17.0"
+          wget -qO- "https://github.com/solana-labs/solana/releases/download/v${SOLANA_VERSION}/solana-release-x86_64-unknown-linux-gnu.tar.bz2" | tar -xjf -
+          echo "$PWD/solana-release/bin" >> $GITHUB_PATH
+          export PATH="$PWD/solana-release/bin:$PATH"
+          solana --version
 
       # 3. Set up Rust (needed for Solana + Anchor programs)
       - name: Set up Rust
