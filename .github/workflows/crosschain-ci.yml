@@ -11,52 +11,30 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Checkout repo
+      # 1. Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Install Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      # 2. Set up Solana CLI
+      - name: Set up Solana
+        uses: ajamaica/setup-solana@v0.0.3
         with:
-          node-version: 20
-          cache: 'npm'
+          solana-version: "1.17.0"
 
-      # Install Rust (for Solana/Anchor)
-      - name: Setup Rust
+      - name: Verify Solana
+        run: solana --version
+
+      # 3. Set up Rust (needed for Solana + Anchor programs)
+      - name: Set up Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
 
-      # Install Solana CLI
-      - name: Install Solana CLI
-        run: |
-          # Try multiple download methods
-          if command -v wget >/dev/null 2>&1; then
-            wget -qO- https://release.solana.com/stable/install | sh
-          elif command -v curl >/dev/null 2>&1; then
-            curl -sSfL https://release.solana.com/stable/install | sh
-          else
-            echo "Neither wget nor curl found, trying alternative method"
-            # Alternative: download from GitHub releases
-            SOLANA_VERSION="1.17.0"
-            wget -qO- "https://github.com/solana-labs/solana/releases/download/v${SOLANA_VERSION}/solana-release-x86_64-unknown-linux-gnu.tar.bz2" | tar -xjf -
-            export PATH="$PWD/solana-release/bin:$PATH"
-          fi
-          
-          # Add to PATH
-          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
-          
-          # Verify installation
-          if command -v solana >/dev/null 2>&1; then
-            solana --version
-          else
-            echo "Solana CLI not found in PATH, checking alternative locations"
-            find /home/runner -name "solana" -type f 2>/dev/null | head -5
-            exit 1
-          fi
+      - name: Verify Rust
+        run: rustc --version
 
-      # Install Anchor
+      # 4. Install Anchor
       - name: Install Anchor
         run: |
           cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
@@ -64,13 +42,20 @@ jobs:
           avm use latest
           anchor --version
 
-      # Install Node deps
+      # 5. Install Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      # 6. Install Node deps
       - name: Install dependencies
         run: |
           cd contracts/nft
           npm install
 
-      # Deploy to Base Sepolia (EVM)
+      # 7. Deploy to Base Sepolia (EVM)
       - name: Deploy Universal NFT to Base Sepolia
         run: |
           cd contracts/nft
@@ -79,7 +64,7 @@ jobs:
           PRIVATE_KEY: ${{ secrets.EVM_PRIVATE_KEY }}
           RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC }}
 
-      # Deploy to ZetaChain testnet
+      # 8. Deploy to ZetaChain testnet
       - name: Deploy Universal NFT to ZetaChain
         run: |
           cd contracts/nft
@@ -88,7 +73,7 @@ jobs:
           PRIVATE_KEY: ${{ secrets.EVM_PRIVATE_KEY }}
           RPC_URL: ${{ secrets.ZETACHAIN_RPC }}
 
-      # Deploy to Solana Devnet
+      # 9. Deploy to Solana Devnet
       - name: Deploy Solana NFT program
         run: |
           echo '${{ secrets.SOLANA_KEYPAIR }}' > ~/.config/solana/id.json
@@ -98,13 +83,13 @@ jobs:
         env:
           SOLANA_RPC_URL: ${{ secrets.SOLANA_DEVNET_RPC }}
 
-      # Capture Solana deployment details
+      # 10. Capture Solana deployment details
       - name: Capture Solana deployment info
         run: |
           cd contracts/nft
           node scripts/deploy-solana.js
 
-      # Run cross-chain NFT transfer tests
+      # 11. Run cross-chain NFT transfer tests
       - name: Run cross-chain transfer tests
         run: |
           cd contracts/nft
@@ -116,14 +101,14 @@ jobs:
           SOLANA_KEYPAIR: ${{ secrets.SOLANA_KEYPAIR }}
           SOLANA_RPC: ${{ secrets.SOLANA_DEVNET_RPC }}
 
-      # Upload result file
+      # 12. Upload result file
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
           name: crosschain-results
           path: contracts/nft/results.json
 
-      # Comment results on PR
+      # 13. Comment results on PR
       - name: Comment results
         uses: peter-evans/create-or-update-comment@v4
         with:
