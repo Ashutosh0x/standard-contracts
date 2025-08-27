@@ -24,6 +24,18 @@ const config: HardhatUserConfig = {
       },
     ],
   },
+  networks: {
+    "base-sepolia": {
+      url: process.env.RPC_URL || "https://sepolia.base.org",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      chainId: 84532,
+    },
+    "zeta-testnet": {
+      url: process.env.RPC_URL || "https://rpc.ankr.com/zetachain_evm_testnet",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      chainId: 7001,
+    },
+  },
 };
 
 export default config;
