@@ -30,7 +30,7 @@ jobs:
 
       # Install Solana CLI
       - name: Install Solana CLI
-        uses: solana-labs/setup-solana@v1
+        uses: solana-labs/setup-solana@v1.0.0
         with:
           version: stable
 
