@@ -54,7 +54,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd contracts/nft
-          npm install
+          npm install --legacy-peer-deps
 
       # 7. Deploy to Base Sepolia (EVM)
       - name: Deploy Universal NFT to Base Sepolia
