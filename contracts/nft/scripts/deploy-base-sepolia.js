@@ -7,8 +7,8 @@ async function main() {
   console.log("🚀 Deploying UniversalNFT to Base Sepolia with account:", deployer.address);
   console.log("💰 Account balance:", (await deployer.getBalance()).toString());
 
-  // Deploy UniversalNFT contract
-  const UniversalNFT = await hre.ethers.getContractFactory("UniversalNFT");
+  // Deploy UniversalNFT contract (EVM version)
+  const UniversalNFT = await hre.ethers.getContractFactory("contracts/evm/UniversalNFT.sol:UniversalNFT");
   const contract = await UniversalNFT.deploy(
     "UniversalNFT",           // name
     "UNFT",                   // symbol
