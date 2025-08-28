@@ -7,20 +7,11 @@ async function main() {
   console.log("🚀 Deploying UniversalNFT to ZetaChain testnet with account:", deployer.address);
   console.log("💰 Account balance:", (await deployer.getBalance()).toString());
 
-  // Deploy UniversalNFT contract (EVM version for ZetaChain - upgradeable)
+  // Deploy UniversalNFT contract (EVM version for ZetaChain)
   const UniversalNFT = await hre.ethers.getContractFactory("contracts/evm/UniversalNFT.sol:UniversalNFT");
   const contract = await UniversalNFT.deploy();
   
-  console.log("📦 Contract deployed, initializing...");
-  
-  // Initialize the contract with parameters
-  await contract.initialize(
-    deployer.address,         // initialOwner
-    "UniversalNFT",           // name
-    "UNFT",                   // symbol
-    "0x6c533f7fe93fae114d0954697069df33c9b74fd7", // ZetaChain Gateway
-    1000000                   // gas limit
-  );
+  console.log("📦 Contract deployed successfully!");
 
   await contract.deployed();
 
