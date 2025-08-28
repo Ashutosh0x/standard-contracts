@@ -56,7 +56,16 @@ jobs:
           cd contracts/nft
           npm install --legacy-peer-deps
 
-      # 7. Deploy to Base Sepolia (EVM)
+      # 7. Check deployer balance on Base Sepolia
+      - name: Check deployer balance on Base Sepolia
+        run: |
+          cd contracts/nft
+          npx hardhat run scripts/check-balance.js --network base-sepolia
+        env:
+          PRIVATE_KEY: ${{ secrets.EVM_PRIVATE_KEY }}
+          RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC }}
+
+      # 8. Deploy to Base Sepolia (EVM)
       - name: Deploy Universal NFT to Base Sepolia
         run: |
           cd contracts/nft
@@ -65,7 +74,16 @@ jobs:
           PRIVATE_KEY: ${{ secrets.EVM_PRIVATE_KEY }}
           RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC }}
 
-      # 8. Deploy to ZetaChain testnet
+      # 9. Check deployer balance on ZetaChain testnet
+      - name: Check deployer balance on ZetaChain testnet
+        run: |
+          cd contracts/nft
+          npx hardhat run scripts/check-balance.js --network zeta-testnet
+        env:
+          PRIVATE_KEY: ${{ secrets.EVM_PRIVATE_KEY }}
+          RPC_URL: ${{ secrets.ZETACHAIN_RPC }}
+
+      # 10. Deploy to ZetaChain testnet
       - name: Deploy Universal NFT to ZetaChain
         run: |
           cd contracts/nft
@@ -74,7 +92,7 @@ jobs:
           PRIVATE_KEY: ${{ secrets.EVM_PRIVATE_KEY }}
           RPC_URL: ${{ secrets.ZETACHAIN_RPC }}
 
-      # 9. Deploy to Solana Devnet
+      # 11. Deploy to Solana Devnet
       - name: Deploy Solana NFT program
         run: |
           echo '${{ secrets.SOLANA_KEYPAIR }}' > ~/.config/solana/id.json
@@ -84,13 +102,13 @@ jobs:
         env:
           SOLANA_RPC_URL: ${{ secrets.SOLANA_DEVNET_RPC }}
 
-      # 10. Capture Solana deployment details
+      # 12. Capture Solana deployment details
       - name: Capture Solana deployment info
         run: |
           cd contracts/nft
           node scripts/deploy-solana.js
 
-      # 11. Run cross-chain NFT transfer tests
+      # 13. Run cross-chain NFT transfer tests
       - name: Run cross-chain transfer tests
         run: |
           cd contracts/nft
@@ -102,14 +120,14 @@ jobs:
           SOLANA_KEYPAIR: ${{ secrets.SOLANA_KEYPAIR }}
           SOLANA_RPC: ${{ secrets.SOLANA_DEVNET_RPC }}
 
-      # 12. Upload result file
+      # 14. Upload result file
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
           name: crosschain-results
           path: contracts/nft/results.json
 
-      # 13. Comment results on PR
+      # 15. Comment results on PR
       - name: Comment results
         uses: peter-evans/create-or-update-comment@v4
         with:
